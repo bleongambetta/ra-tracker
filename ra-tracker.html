@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>★ RA Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=IBM+Plex+Mono:wght@400;600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0b14;
+  --surface: #131424;
+  --surface2: #1c1d2e;
+  --border: #252638;
+  --accent: #00e87a;
+  --accent-dim: #00a857;
+  --orange: #ff7043;
+  --purple: #7b68ff;
+  --blue: #4db8ff;
+  --red: #ff4757;
+  --text: #e2e4ff;
+  --muted: #686888;
+  --pixel: 'Press Start 2P', monospace;
+  --mono: 'IBM Plex Mono', monospace;
+  --body: 'Nunito', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  background-image:
+    radial-gradient(ellipse at 15% 60%, rgba(0,232,122,0.05) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 15%, rgba(123,104,255,0.05) 0%, transparent 55%);
+  color: var(--text);
+  font-family: var(--body);
+  min-height: 100vh;
+}
+
+/* HEADER */
+.header {
+  background: rgba(19,20,36,0.96);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 54px;
+}
+.logo {
+  font-family: var(--pixel);
+  font-size: 9px;
+  color: var(--accent);
+  text-shadow: 0 0 20px rgba(0,232,122,0.6);
+  white-space: nowrap;
+  line-height: 1;
+}
+.nav { display: flex; gap: 3px; flex: 1; }
+.nav-btn {
+  background: none;
+  border: 1px solid transparent;
+  color: var(--muted);
+  font-family: var(--body);
+  font-weight: 700;
+  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.nav-btn:hover { color: var(--text); background: var(--surface2); }
+.nav-btn.active { color: var(--accent); border-color: rgba(0,232,122,0.3); background: rgba(0,232,122,0.08); }
+
+/* MAIN */
+.main { max-width: 900px; margin: 0 auto; padding: 20px 14px; }
+
+/* VIEWS */
+.view { display: none; }
+.view.active { display: block; }
+
+/* CARD */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+
+/* GAME CARD */
+.game-card {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+}
+.game-card:last-child { border-bottom: none; }
+.game-card:hover { background: var(--surface2); }
+.game-icon {
+  width: 40px; height: 40px; border-radius: 6px;
+  object-fit: cover; background: var(--surface2); flex-shrink: 0;
+}
+.game-info { flex: 1; min-width: 0; }
+.game-title {
+  font-weight: 700; font-size: 14px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.game-meta { font-size: 11px; color: var(--muted); font-family: var(--mono); margin-top: 2px; }
+.game-progress { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; min-width: 72px; }
+.pct-label { font-family: var(--mono); font-size: 12px; font-weight: 600; }
+.pct-label.c100 { color: var(--accent); }
+.pct-label.cpart { color: var(--blue); }
+.pct-label.c0 { color: var(--muted); }
+.prog-bar { width: 72px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+.fill-100 { background: var(--accent); }
+.fill-part { background: var(--blue); }
+.fill-0 { background: var(--muted); width: 0 !important; }
+
+/* FILTERS */
+.filters { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+.search-input {
+  flex: 1; min-width: 150px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text); font-family: var(--body); font-size: 14px;
+  padding: 8px 12px; outline: none; transition: border-color 0.15s;
+}
+.search-input:focus { border-color: rgba(0,232,122,0.4); }
+.search-input::placeholder { color: var(--muted); }
+.filter-select {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text); font-family: var(--body); font-size: 13px;
+  padding: 8px 10px; outline: none; cursor: pointer;
+}
+.filter-select:focus { border-color: rgba(0,232,122,0.4); }
+
+/* BUTTONS */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: none; border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text); font-family: var(--body); font-weight: 700; font-size: 13px;
+  padding: 8px 14px; cursor: pointer; transition: all 0.15s;
+}
+.btn:hover { background: var(--surface2); border-color: var(--muted); }
+.btn-primary { background: rgba(0,232,122,0.1); border-color: rgba(0,232,122,0.4); color: var(--accent); }
+.btn-primary:hover { background: rgba(0,232,122,0.18); }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-icon { padding: 6px 8px; }
+.btn-danger { color: var(--red); border-color: rgba(255,71,87,0.3); }
+.btn-danger:hover { background: rgba(255,71,87,0.1); }
+
+/* SECTION HEADER */
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.section-title { font-family: var(--pixel); font-size: 8px; color: var(--accent); letter-spacing: 1.5px; }
+.count-badge {
+  font-family: var(--mono); font-size: 11px; color: var(--muted);
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 2px 10px;
+}
+
+/* EVENT CARDS */
+.event-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 14px 16px; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer; transition: all 0.15s;
+}
+.event-card:hover { border-color: rgba(255,255,255,0.12); background: var(--surface2); transform: translateY(-1px); }
+.event-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 8px currentColor; }
+.event-name { font-weight: 800; font-size: 15px; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.event-meta { font-size: 12px; color: var(--muted); font-family: var(--mono); margin-top: 3px; }
+.event-badge {
+  font-size: 10px; font-family: var(--mono); font-weight: 600;
+  padding: 3px 8px; border-radius: 4px; white-space: nowrap; flex-shrink: 0;
+}
+.badge-ach { background: rgba(123,104,255,0.15); color: var(--purple); border: 1px solid rgba(123,104,255,0.3); }
+.badge-hub { background: rgba(255,112,67,0.15); color: var(--orange); border: 1px solid rgba(255,112,67,0.3); }
+
+/* EVENT DETAIL */
+.detail-header {
+  display: flex; align-items: flex-start; gap: 12px; margin-bottom: 22px;
+  padding-bottom: 16px; border-bottom: 1px solid var(--border);
+}
+.detail-title { font-family: var(--pixel); font-size: 10px; color: var(--text); line-height: 1.9; }
+.detail-goal { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.event-game-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px; border-bottom: 1px solid var(--border);
+}
+.event-game-row:last-child { border-bottom: none; }
+.priority-num { font-family: var(--pixel); font-size: 7px; color: var(--muted); width: 20px; text-align: center; flex-shrink: 0; }
+.priority-btns { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
+.prio-btn {
+  background: none; border: none; color: var(--muted);
+  cursor: pointer; padding: 1px 4px; font-size: 9px;
+  border-radius: 3px; transition: all 0.1s; line-height: 1;
+}
+.prio-btn:hover { color: var(--text); background: var(--surface2); }
+.prio-btn:disabled { opacity: 0.2; cursor: default; }
+.ach-stat {
+  font-family: var(--mono); font-size: 11px; text-align: right;
+  flex-shrink: 0; min-width: 90px;
+}
+.ach-stat .earned { color: var(--accent); font-weight: 600; font-size: 13px; }
+.ach-stat .denom { color: var(--muted); }
+
+/* MODAL */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(5px);
+  z-index: 200;
+  display: flex; align-items: flex-end; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+.overlay.open { opacity: 1; pointer-events: all; }
+@media (min-width: 600px) { .overlay { align-items: center; padding: 20px; } }
+.modal {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px 16px 0 0;
+  width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto;
+  padding: 22px;
+  transform: translateY(20px); transition: transform 0.2s;
+}
+@media (min-width: 600px) { .modal { border-radius: 16px; transform: none; } }
+.overlay.open .modal { transform: translateY(0); }
+.modal-title { font-family: var(--pixel); font-size: 8px; color: var(--accent); margin-bottom: 18px; letter-spacing: 1px; }
+.form-row { margin-bottom: 14px; }
+.form-label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.form-input {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text); font-family: var(--body); font-size: 14px;
+  padding: 10px 12px; outline: none; transition: border-color 0.15s;
+}
+.form-input:focus { border-color: rgba(0,232,122,0.4); }
+.form-input::placeholder { color: var(--muted); }
+.type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.type-option {
+  background: var(--surface2); border: 2px solid var(--border); border-radius: 8px;
+  padding: 12px 10px; cursor: pointer; transition: all 0.15s; text-align: center;
+}
+.type-option.selected { border-color: var(--accent); background: rgba(0,232,122,0.08); }
+.type-opt-label { font-weight: 700; font-size: 13px; }
+.type-opt-desc { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+.color-row { display: flex; gap: 10px; align-items: center; }
+.swatch {
+  width: 26px; height: 26px; border-radius: 50%; cursor: pointer;
+  border: 2px solid transparent; transition: all 0.12s;
+}
+.swatch.sel { border-color: white; transform: scale(1.25); }
+.modal-footer {
+  display: flex; gap: 8px; justify-content: flex-end;
+  margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border);
+}
+.modal-footer .btn-danger { margin-right: auto; }
+
+/* ACH PICKER */
+.ach-list { max-height: 280px; overflow-y: auto; margin-top: 8px; border: 1px solid var(--border); border-radius: 8px; }
+.ach-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.1s;
+}
+.ach-item:last-child { border-bottom: none; }
+.ach-item:hover { background: var(--surface2); }
+.ach-check {
+  width: 16px; height: 16px; border-radius: 3px; border: 2px solid var(--border);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 10px; transition: all 0.1s; color: transparent;
+}
+.ach-check.on { background: var(--accent); border-color: var(--accent); color: #000; }
+.ach-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.ach-name { font-size: 13px; font-weight: 600; flex: 1; line-height: 1.3; }
+.ach-pts { font-family: var(--mono); font-size: 11px; color: var(--muted); flex-shrink: 0; }
+.ach-selcount { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+
+/* GAME SEARCH IN MODAL */
+.gsearch-list { max-height: 270px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; margin-top: 8px; }
+.gsearch-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.1s;
+}
+.gsearch-item:last-child { border-bottom: none; }
+.gsearch-item:hover { background: var(--surface2); }
+.gsearch-item.already { opacity: 0.45; cursor: default; }
+.gsearch-item.already:hover { background: transparent; }
+
+/* SETUP */
+.setup-wrap { max-width: 400px; margin: 56px auto; text-align: center; padding: 0 4px; }
+.setup-logo { font-family: var(--pixel); font-size: 13px; color: var(--accent); text-shadow: 0 0 30px rgba(0,232,122,0.6); margin-bottom: 10px; line-height: 1.8; }
+.setup-sub { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+
+/* LOADING / EMPTY */
+.loading-state { text-align: center; padding: 44px 20px; color: var(--muted); font-size: 14px; }
+.spinner {
+  display: inline-block; width: 22px; height: 22px;
+  border: 2px solid var(--border); border-top-color: var(--accent);
+  border-radius: 50%; animation: spin 0.75s linear infinite; margin-bottom: 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.empty-state { text-align: center; padding: 48px 20px; color: var(--muted); }
+.empty-icon { font-size: 38px; margin-bottom: 14px; }
+.empty-title { font-family: var(--pixel); font-size: 8px; color: var(--text); margin-bottom: 8px; line-height: 1.8; }
+
+/* NOTIFICATION */
+.notif {
+  position: fixed; bottom: 20px; left: 50%;
+  transform: translateX(-50%) translateY(70px);
+  background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 10px 20px; font-size: 14px; font-weight: 700;
+  z-index: 999; transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  white-space: nowrap; pointer-events: none;
+}
+.notif.show { transform: translateX(-50%) translateY(0); }
+.notif.ok { border-color: rgba(0,232,122,0.5); color: var(--accent); }
+.notif.err { border-color: rgba(255,71,87,0.5); color: var(--red); }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+@media (max-width: 480px) {
+  .game-card { gap: 8px; padding: 9px 10px; }
+  .game-icon { width: 36px; height: 36px; }
+  .header { padding: 0 10px; }
+  .logo { font-size: 7px; }
+}
+</style>
+</head>
+<body>
+
+<header class="header" id="hdr">
+  <span class="logo">★ RA TRACKER</span>
+  <nav class="nav" id="nav"></nav>
+  <button class="btn btn-sm btn-icon" onclick="openModal('settings')" title="Settings" style="flex-shrink:0;">⚙</button>
+  <button class="btn btn-sm btn-icon" onclick="openModal('backup')" title="Backup & Restore" style="flex-shrink:0;">💾</button>
+</header>
+
+<input type="file" id="import-file" accept=".json" style="display:none" onchange="doImport(this.files[0])">
+
+<main class="main">
+  <!-- SETUP -->
+  <div class="view active" id="view-setup">
+    <div class="setup-wrap">
+      <div class="setup-logo">★ RA TRACKER</div>
+      <div class="setup-sub">Your personal RetroAchievements dashboard</div>
+      <div class="card" style="padding:24px; text-align:left;">
+        <div class="form-row">
+          <label class="form-label">RetroAchievements Username</label>
+          <input class="form-input" id="su-user" placeholder="YourUsername" type="text" autocomplete="username">
+        </div>
+        <div class="form-row">
+          <label class="form-label">API Key</label>
+          <input class="form-input" id="su-key" placeholder="From Settings → API Key on the RA site" type="password" autocomplete="current-password">
+          <div style="margin-top:6px;font-size:11px;color:var(--muted);">retroachievements.org → Settings → API Key</div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;font-size:14px;" onclick="submitSetup()">
+          Connect &rarr;
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIBRARY -->
+  <div class="view" id="view-library">
+    <div class="section-header">
+      <span class="section-title">MY LIBRARY</span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span class="count-badge" id="lib-count">—</span>
+        <button class="btn btn-sm" onclick="loadLibrary(true)">↻ Refresh</button>
+      </div>
+    </div>
+    <div class="filters">
+      <input class="search-input" id="lib-q" placeholder="Search games…" oninput="filterLib()" type="search">
+      <select class="filter-select" id="lib-con" onchange="filterLib()"><option value="">All Consoles</option></select>
+      <select class="filter-select" id="lib-prog" onchange="filterLib()">
+        <option value="">Any Progress</option>
+        <option value="0">Not Started</option>
+        <option value="1">In Progress</option>
+        <option value="100">Completed</option>
+      </select>
+      <select class="filter-select" id="lib-sort" onchange="filterLib()">
+        <option value="recent">Recently Played</option>
+        <option value="az">Title A–Z</option>
+        <option value="pct-hi">Most Complete</option>
+        <option value="pct-lo">Least Complete</option>
+        <option value="console">Console</option>
+      </select>
+    </div>
+    <div id="lib-body"></div>
+  </div>
+
+  <!-- EVENTS -->
+  <div class="view" id="view-events">
+    <div class="section-header">
+      <span class="section-title">MY EVENTS</span>
+      <button class="btn btn-primary btn-sm" onclick="openModal('new-event')">+ New Event</button>
+    </div>
+    <div id="ev-body"></div>
+  </div>
+
+  <!-- EVENT DETAIL -->
+  <div class="view" id="view-event-detail">
+    <div id="evd-body"></div>
+  </div>
+</main>
+
+<div class="overlay" id="overlay" onclick="bgClick(event)">
+  <div class="modal" id="modal"></div>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<script>
+// ─── CONSTANTS ────────────────────────────────────────────────────
+const RA = 'https://retroachievements.org/API/';
+const RA_IMG = 'https://media.retroachievements.org';
+const COLORS = ['#00e87a','#ff7043','#7b68ff','#4db8ff','#ffd93d','#ff4d6d'];
+
+// ─── STATE ────────────────────────────────────────────────────────
+const S = {
+  view: 'setup',
+  cfg: { user: '', key: '' },
+  lib: { all: [], shown: [], loading: false, loaded: false, err: null },
+  events: [],
+  detail: { ev: null, gameData: {} },
+  modal: null,
+  tmp: {}   // scratch for modal interactions
+};
+
+// ─── STORAGE ──────────────────────────────────────────────────────
+const LS = {
+  get(k, def) { try { const v=localStorage.getItem('rat_'+k); return v?JSON.parse(v):def; } catch(e){return def;} },
+  set(k,v)   { try { localStorage.setItem('rat_'+k, JSON.stringify(v)); } catch(e){} }
+};
+
+// ─── RA API ───────────────────────────────────────────────────────
+async function ra(ep, params={}) {
+  const u = new URL(RA + ep);
+  u.searchParams.set('z', S.cfg.user);
+  u.searchParams.set('y', S.cfg.key);
+  for (const [k,v] of Object.entries(params)) u.searchParams.set(k, String(v));
+  const r = await fetch(u.toString());
+  if (!r.ok) throw new Error('HTTP '+r.status);
+  const d = await r.json();
+  if (d && d.message) throw new Error(d.message);
+  return d;
+}
+
+async function loadLibrary(force=false) {
+  if (S.lib.loading) return;
+  if (S.lib.loaded && !force) { filterLib(); return; }
+  S.lib.loading = true; S.lib.err = null;
+  renderLibBody();
+  try {
+    const [comp, rec] = await Promise.all([
+      ra('API_GetUserCompletedGames.php', { u: S.cfg.user }),
+      ra('API_GetUserRecentlyPlayedGames.php', { u: S.cfg.user, c: 50 })
+    ]);
+    const map = new Map();
+    for (const g of (Array.isArray(rec)?rec:[])) {
+      map.set(g.GameID, {
+        id: g.GameID, title: g.Title||'?', icon: g.ImageIcon||'',
+        con: g.ConsoleName||'?', conId: g.ConsoleID||0,
+        earned: +g.NumAchieved||0, total: +g.NumPossibleAchievements||0,
+        last: g.LastPlayed||null,
+        pct: g.NumPossibleAchievements>0 ? Math.round(g.NumAchieved/g.NumPossibleAchievements*100) : 0
+      });
+    }
+    for (const g of (Array.isArray(comp)?comp:[])) {
+      if (!map.has(g.GameID)) {
+        const e=+g.NumAwarded||0, t=+g.MaxPossible||0;
+        map.set(g.GameID, {
+          id:g.GameID, title:g.Title||'?', icon:g.ImageIcon||'',
+          con:g.ConsoleName||'?', conId:g.ConsoleID||0,
+          earned:e, total:t, last:null,
+          pct: t>0?Math.round(e/t*100):0
+        });
+      }
+    }
+    S.lib.all = Array.from(map.values());
+    S.lib.loaded = true; S.lib.loading = false;
+    populateConFilter();
+    filterLib();
+  } catch(err) {
+    S.lib.err = err.message; S.lib.loading = false;
+    renderLibBody();
+  }
+}
+
+async function fetchGameDetail(gameId) {
+  return ra('API_GetGameInfoAndUserProgress.php', { u: S.cfg.user, g: gameId });
+}
+
+// ─── UTILS ────────────────────────────────────────────────────────
+function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function img(icon) {
+  if (!icon) return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>';
+  return icon.startsWith('http') ? icon : RA_IMG+icon;
+}
+function pctCls(p) { return p===100?'c100':p>0?'cpart':'c0'; }
+function fillCls(p) { return p===100?'fill-100':p>0?'fill-part':'fill-0'; }
+function libGame(id) { return S.lib.all.find(g=>g.id===id); }
+
+// ─── NAVIGATION ───────────────────────────────────────────────────
+function setView(v) {
+  S.view = v;
+  ['library','events','event-detail'].forEach(n => {
+    document.getElementById('view-'+n)?.classList.toggle('active', n===v);
+  });
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.view===v);
+  });
+  if (v==='library') { if (!S.lib.loaded&&!S.lib.loading) loadLibrary(); else filterLib(); }
+  if (v==='events') renderEvs();
+}
+
+function buildNav() {
+  document.getElementById('nav').innerHTML = `
+    <button class="nav-btn" data-view="library" onclick="setView('library')">Library</button>
+    <button class="nav-btn" data-view="events" onclick="setView('events')">Events</button>`;
+}
+
+function openDetail(evId) {
+  const ev = S.events.find(e=>e.id===evId); if (!ev) return;
+  S.detail = { ev, gameData: {} };
+  S.view = 'event-detail';
+  ['library','events','setup'].forEach(n => document.getElementById('view-'+n)?.classList.remove('active'));
+  document.getElementById('view-event-detail').classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  renderDetail();
+  // Load ach data for games that have achIds
+  ev.games.filter(g=>g.achIds?.length>0).forEach(async g => {
+    try {
+      S.detail.gameData[g.gameId] = await fetchGameDetail(g.gameId);
+      renderDetail();
+    } catch(e){}
+  });
+}
+
+// ─── LIBRARY ──────────────────────────────────────────────────────
+function populateConFilter() {
+  const sel = document.getElementById('lib-con');
+  const cur = sel?.value||'';
+  const cons = [...new Set(S.lib.all.map(g=>g.con))].sort();
+  if (sel) sel.innerHTML = `<option value="">All Consoles</option>`+cons.map(c=>`<option value="${esc(c)}"${c===cur?' selected':''}>${esc(c)}</option>`).join('');
+}
+
+function filterLib() {
+  const q = (document.getElementById('lib-q')?.value||'').toLowerCase();
+  const con = document.getElementById('lib-con')?.value||'';
+  const prog = document.getElementById('lib-prog')?.value||'';
+  const sort = document.getElementById('lib-sort')?.value||'recent';
+  let gs = [...S.lib.all];
+  if (q) gs = gs.filter(g=>g.title.toLowerCase().includes(q));
+  if (con) gs = gs.filter(g=>g.con===con);
+  if (prog==='0') gs = gs.filter(g=>g.pct===0);
+  else if (prog==='1') gs = gs.filter(g=>g.pct>0&&g.pct<100);
+  else if (prog==='100') gs = gs.filter(g=>g.pct===100);
+  gs.sort((a,b)=>{
+    if (sort==='az') return a.title.localeCompare(b.title);
+    if (sort==='pct-hi') return b.pct-a.pct;
+    if (sort==='pct-lo') return a.pct-b.pct;
+    if (sort==='console') return a.con.localeCompare(b.con)||a.title.localeCompare(b.title);
+    // recent
+    if (a.last&&!b.last) return -1; if (!a.last&&b.last) return 1;
+    if (a.last&&b.last) return new Date(b.last)-new Date(a.last);
+    return a.title.localeCompare(b.title);
+  });
+  S.lib.shown = gs;
+  renderLibBody();
+}
+
+function renderLibBody() {
+  const el = document.getElementById('lib-body');
+  const cnt = document.getElementById('lib-count');
+  if (!el) return;
+  if (S.lib.loading) {
+    el.innerHTML = `<div class="loading-state"><div class="spinner"></div><div>Loading library…</div></div>`;
+    if(cnt) cnt.textContent='—'; return;
+  }
+  if (S.lib.err) {
+    el.innerHTML = `<div class="card"><div class="loading-state">
+      <div style="font-size:28px;margin-bottom:10px;">⚠</div>
+      <div style="color:var(--red);margin-bottom:8px;">${esc(S.lib.err)}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Check your username &amp; API key, or verify retroachievements.org is accessible.</div>
+      <button class="btn btn-sm" onclick="loadLibrary(true)">Try Again</button>
+    </div></div>`; if(cnt) cnt.textContent='!'; return;
+  }
+  if (!S.lib.loaded) {
+    el.innerHTML = `<div class="loading-state"><div class="spinner"></div></div>`; return;
+  }
+  const gs = S.lib.shown;
+  if (cnt) cnt.textContent = `${gs.length} game${gs.length!==1?'s':''}`;
+  if (gs.length===0) {
+    el.innerHTML = `<div class="card"><div class="empty-state">
+      <div class="empty-icon">🎮</div><div class="empty-title">NO GAMES FOUND</div>
+      <div style="font-size:13px;">Try adjusting your filters</div>
+    </div></div>`; return;
+  }
+  el.innerHTML = `<div class="card">${gs.map(g=>{
+    const p=g.pct, fc=fillCls(p), pc=pctCls(p);
+    return `<div class="game-card">
+      <img class="game-icon" src="${img(g.icon)}" alt="" loading="lazy" onerror="this.style.opacity=.15">
+      <div class="game-info">
+        <div class="game-title">${esc(g.title)}</div>
+        <div class="game-meta">${esc(g.con)} &middot; ${g.earned}/${g.total} achievements</div>
+      </div>
+      <div class="game-progress">
+        <span class="pct-label ${pc}">${p}%</span>
+        <div class="prog-bar"><div class="prog-fill ${fc}" style="width:${p}%"></div></div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// ─── EVENTS LIST ──────────────────────────────────────────────────
+function renderEvs() {
+  const el = document.getElementById('ev-body'); if (!el) return;
+  if (S.events.length===0) {
+    el.innerHTML = `<div class="card"><div class="empty-state">
+      <div class="empty-icon">🏆</div>
+      <div class="empty-title">NO EVENTS YET</div>
+      <div style="font-size:13px;margin-bottom:18px;">Track your RA events, challenges &amp; hub goals</div>
+      <button class="btn btn-primary" onclick="openModal('new-event')">+ Create First Event</button>
+    </div></div>`; return;
+  }
+  el.innerHTML = S.events.map(ev=>{
+    const started = ev.games.filter(g=>{ const lg=libGame(g.gameId); return lg&&lg.earned>0; }).length;
+    const badge = ev.type==='ach'
+      ? `<span class="event-badge badge-ach">ACH PAGE</span>`
+      : `<span class="event-badge badge-hub">HUB</span>`;
+    return `<div class="event-card" onclick="openDetail('${ev.id}')">
+      <div class="event-dot" style="background:${ev.color||COLORS[0]};color:${ev.color||COLORS[0]}"></div>
+      <div style="flex:1;min-width:0;">
+        <div class="event-name">${esc(ev.name)}</div>
+        <div class="event-meta">${ev.games.length} game${ev.games.length!==1?'s':''} &middot; ${started} started${ev.goal?' &middot; '+esc(ev.goal):''}</div>
+      </div>
+      ${badge}
+      <span style="color:var(--muted);font-size:20px;margin-left:4px;">›</span>
+    </div>`;
+  }).join('');
+}
+
+// ─── EVENT DETAIL ─────────────────────────────────────────────────
+function renderDetail() {
+  const el = document.getElementById('evd-body'); if (!el) return;
+  const ev = S.detail.ev; if (!ev) return;
+  const typeBadge = ev.type==='ach'
+    ? `<span class="event-badge badge-ach">ACHIEVEMENT PAGE</span>`
+    : `<span class="event-badge badge-hub">HUB / LIST</span>`;
+
+  const rows = ev.games.map((eg,i)=>{
+    const lg = libGame(eg.gameId);
+    const gd = S.detail.gameData[eg.gameId];
+    let statHtml='';
+
+    if (eg.achIds?.length>0) {
+      // achievement-specific
+      let earned=0;
+      if (gd?.Achievements) {
+        earned = eg.achIds.filter(id=>{ const a=gd.Achievements[id]; return a&&(a.DateEarned||a.DateEarnedHardcore); }).length;
+      }
+      const tot=eg.achIds.length, p=tot>0?Math.round(earned/tot*100):0;
+      const loadingDot = !gd ? `<span style="font-size:10px;color:var(--muted);">⋯</span>` : '';
+      statHtml=`<div class="ach-stat">
+        <div>${loadingDot}<span class="earned">${earned}</span><span class="denom">/${tot} qualifying</span></div>
+        <div class="prog-bar" style="width:80px;margin-top:4px;">
+          <div class="prog-fill ${fillCls(p)}" style="width:${p}%"></div>
+        </div>
+      </div>`;
+    } else if (lg) {
+      statHtml=`<div class="ach-stat">
+        <div><span class="earned">${lg.earned}</span><span class="denom">/${lg.total} ach</span></div>
+        <div class="prog-bar" style="width:80px;margin-top:4px;">
+          <div class="prog-fill ${fillCls(lg.pct)}" style="width:${lg.pct}%"></div>
+        </div>
+      </div>`;
+    }
+
+    const title = eg.title||(lg?.title||`#${eg.gameId}`);
+    const con   = eg.con||(lg?.con||'');
+    const icon  = eg.icon||(lg?.icon||'');
+    const achNote = eg.achIds?.length>0 ? ` &middot; ${eg.achIds.length} qualifying ach.` : '';
+
+    return `<div class="event-game-row">
+      <div class="priority-btns">
+        <button class="prio-btn" onclick="mvPrio('${ev.id}',${i},-1)" ${i===0?'disabled':''}>&uarr;</button>
+        <button class="prio-btn" onclick="mvPrio('${ev.id}',${i},1)" ${i===ev.games.length-1?'disabled':''}>&darr;</button>
+      </div>
+      <div class="priority-num">#${i+1}</div>
+      <img class="game-icon" src="${img(icon)}" alt="" loading="lazy" onerror="this.style.opacity=.15">
+      <div class="game-info" style="flex:1;">
+        <div class="game-title">${esc(title)}</div>
+        <div class="game-meta">${esc(con)}${achNote}</div>
+      </div>
+      ${statHtml}
+      <div style="display:flex;gap:4px;flex-shrink:0;">
+        ${ev.type==='ach'?`<button class="btn btn-sm btn-icon" title="Configure qualifying achievements" onclick="openAchPicker('${ev.id}',${eg.gameId})">🎯</button>`:''}
+        <button class="btn btn-sm btn-icon btn-danger" title="Remove" onclick="rmGame('${ev.id}',${eg.gameId})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="detail-header">
+      <button class="btn btn-sm" onclick="setView('events');renderEvs()">← Back</button>
+      <div style="flex:1;min-width:0;">
+        <div class="detail-title">${esc(ev.name)}</div>
+        ${ev.goal?`<div class="detail-goal">Goal: ${esc(ev.goal)}</div>`:''}
+        ${ev.notes?`<div class="detail-goal" style="font-size:11px;"><a href="${esc(ev.notes)}" target="_blank" style="color:var(--blue);">📎 Reference link</a></div>`:''}
+      </div>
+      ${typeBadge}
+      <button class="btn btn-sm" onclick="openModal('edit-event','${ev.id}')">Edit</button>
+    </div>
+    <div class="section-header">
+      <span class="section-title">GAME QUEUE</span>
+      <button class="btn btn-primary btn-sm" onclick="openModal('add-game','${ev.id}')">+ Add Game</button>
+    </div>
+    ${ev.games.length===0
+      ? `<div class="card"><div class="empty-state">
+          <div class="empty-icon">🎮</div><div class="empty-title">NO GAMES ADDED</div>
+          <div style="font-size:13px;margin-bottom:18px;">Add games to track progress for this event</div>
+          <button class="btn btn-primary" onclick="openModal('add-game','${ev.id}')">+ Add Game</button>
+        </div></div>`
+      : `<div class="card">${rows}</div>`
+    }`;
+}
+
+function mvPrio(evId, idx, dir) {
+  const ev=S.events.find(e=>e.id===evId); if(!ev) return;
+  const ni=idx+dir; if(ni<0||ni>=ev.games.length) return;
+  [ev.games[idx],ev.games[ni]]=[ev.games[ni],ev.games[idx]];
+  saveAll(); renderDetail();
+}
+
+function rmGame(evId, gameId) {
+  const ev=S.events.find(e=>e.id===evId); if(!ev) return;
+  ev.games=ev.games.filter(g=>g.gameId!==gameId);
+  saveAll(); renderDetail(); toast('Game removed','ok');
+}
+
+// ─── MODALS ───────────────────────────────────────────────────────
+function openModal(type, data) {
+  S.modal={type,data}; S.tmp={};
+  document.getElementById('modal').innerHTML=mRender(type,data);
+  document.getElementById('overlay').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+  S.modal=null; S.tmp={};
+}
+function bgClick(e) { if(e.target.id==='overlay') closeModal(); }
+
+function mRender(type, data) {
+  if(type==='settings') return mSettings();
+  if(type==='new-event') return mEvent(null);
+  if(type==='edit-event') return mEvent(S.events.find(e=>e.id===data));
+  if(type==='add-game') return mAddGame(data);
+  if(type==='ach-picker') return mAchPicker(data);
+  if(type==='backup') return mBackup();
+  return '';
+}
+
+// SETTINGS MODAL
+function mSettings() {
+  return `<div class="modal-title">⚙ SETTINGS</div>
+    <div class="form-row">
+      <label class="form-label">Username</label>
+      <input class="form-input" id="ms-u" value="${esc(S.cfg.user)}" placeholder="RetroAchievements username">
+    </div>
+    <div class="form-row">
+      <label class="form-label">API Key</label>
+      <input class="form-input" id="ms-k" type="password" value="${esc(S.cfg.key)}" placeholder="API key">
+      <div style="margin-top:6px;font-size:11px;color:var(--muted);">retroachievements.org → Settings → API Key</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="applySettings()">Save</button>
+    </div>`;
+}
+function applySettings() {
+  const u=document.getElementById('ms-u')?.value.trim();
+  const k=document.getElementById('ms-k')?.value.trim();
+  if(!u||!k){toast('Fill in both fields','err');return;}
+  S.cfg={user:u,key:k}; LS.set('cfg',S.cfg);
+  closeModal(); toast('Settings saved','ok');
+  if(S.view==='library'){S.lib.loaded=false;S.lib.all=[];loadLibrary();}
+}
+
+// EVENT CREATE / EDIT MODAL
+function mEvent(ev) {
+  const isNew=!ev;
+  const name=ev?.name||''; const type=ev?.type||'hub';
+  const color=ev?.color||COLORS[0]; const goal=ev?.goal||''; const notes=ev?.notes||'';
+  return `<div class="modal-title">${isNew?'+ NEW EVENT':'✏ EDIT EVENT'}</div>
+    <div class="form-row">
+      <label class="form-label">Event Name</label>
+      <input class="form-input" id="me-n" value="${esc(name)}" placeholder="e.g. AOTW 2026, Dinosaurs Hub Challenge">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Type</label>
+      <div class="type-grid">
+        <div class="type-option ${type==='ach'?'selected':''}" id="to-ach" onclick="selType('ach')">
+          <div class="type-opt-label">🎯 Achievement Page</div>
+          <div class="type-opt-desc">Track specific achievements per game (AOTW-style)</div>
+        </div>
+        <div class="type-option ${type==='hub'?'selected':''}" id="to-hub" onclick="selType('hub')">
+          <div class="type-opt-label">🗂 Hub / List</div>
+          <div class="type-opt-desc">Track overall game completion progress</div>
+        </div>
+      </div>
+      <input type="hidden" id="me-t" value="${type}">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Color</label>
+      <div class="color-row">${COLORS.map(c=>`<div class="swatch ${c===color?'sel':''}" style="background:${c}" data-c="${c}" onclick="selColor('${c}')"></div>`).join('')}</div>
+      <input type="hidden" id="me-c" value="${color}">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Goal / Description <span style="font-weight:400;">(optional)</span></label>
+      <input class="form-input" id="me-g" value="${esc(goal)}" placeholder="e.g. Earn 100 XP in Dinosaurs Hub">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Reference URL / Notes <span style="font-weight:400;">(optional)</span></label>
+      <input class="form-input" id="me-u" value="${esc(notes)}" placeholder="https://retroachievements.org/event/…">
+    </div>
+    <div class="modal-footer">
+      ${!isNew?`<button class="btn btn-danger" onclick="delEvent('${ev.id}')">Delete</button>`:''}
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="${isNew?'doCreateEvent()':'doSaveEvent(\''+ev.id+'\')'}">
+        ${isNew?'Create Event':'Save Changes'}
+      </button>
+    </div>`;
+}
+function selType(t) {
+  document.getElementById('me-t').value=t;
+  document.getElementById('to-ach').classList.toggle('selected',t==='ach');
+  document.getElementById('to-hub').classList.toggle('selected',t==='hub');
+}
+function selColor(c) {
+  document.getElementById('me-c').value=c;
+  document.querySelectorAll('.swatch').forEach(el=>el.classList.toggle('sel',el.dataset.c===c));
+}
+function doCreateEvent() {
+  const n=document.getElementById('me-n')?.value.trim(); if(!n){toast('Enter a name','err');return;}
+  const ev={id:uid(),name:n,type:document.getElementById('me-t')?.value||'hub',
+    color:document.getElementById('me-c')?.value||COLORS[0],
+    goal:document.getElementById('me-g')?.value.trim()||'',
+    notes:document.getElementById('me-u')?.value.trim()||'',
+    games:[]};
+  S.events.push(ev); saveAll(); closeModal(); toast('Event created!','ok'); renderEvs();
+}
+function doSaveEvent(id) {
+  const ev=S.events.find(e=>e.id===id); if(!ev) return;
+  const n=document.getElementById('me-n')?.value.trim(); if(!n){toast('Enter a name','err');return;}
+  ev.name=n; ev.type=document.getElementById('me-t')?.value||'hub';
+  ev.color=document.getElementById('me-c')?.value||COLORS[0];
+  ev.goal=document.getElementById('me-g')?.value.trim()||'';
+  ev.notes=document.getElementById('me-u')?.value.trim()||'';
+  saveAll(); closeModal(); toast('Saved','ok');
+  if(S.detail.ev?.id===id){S.detail.ev=ev; renderDetail();}
+  renderEvs();
+}
+function delEvent(id) {
+  if(!confirm('Delete this event?')) return;
+  S.events=S.events.filter(e=>e.id!==id); saveAll(); closeModal();
+  setView('events'); renderEvs(); toast('Event deleted','ok');
+}
+
+// ADD GAME MODAL
+function mAddGame(evId) {
+  const ev=S.events.find(e=>e.id===evId); if(!ev) return '';
+  const existing=new Set(ev.games.map(g=>g.gameId));
+  const q=(S.tmp.q||'').toLowerCase();
+  let gs=S.lib.all;
+  if(q) gs=gs.filter(g=>g.title.toLowerCase().includes(q)||g.con.toLowerCase().includes(q));
+  gs=gs.slice(0,60);
+  const listHtml = !S.lib.loaded
+    ? `<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">Visit the Library tab first to load your games</div>`
+    : gs.length===0
+      ? `<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">No games found</div>`
+      : gs.map(g=>{
+          const a=existing.has(g.id);
+          return `<div class="gsearch-item ${a?'already':''}" onclick="${a?'':  `doAddGame('${evId}',${g.id})`}">
+            <img src="${img(g.icon)}" width="34" height="34" style="border-radius:5px;flex-shrink:0;background:var(--surface2);" onerror="this.style.opacity=.15">
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(g.title)}</div>
+              <div style="font-size:11px;color:var(--muted);font-family:var(--mono);">${esc(g.con)} &middot; ${g.pct}%</div>
+            </div>
+            ${a?`<span style="color:var(--accent);font-size:11px;font-family:var(--mono);">✓ Added</span>`:`<span style="color:var(--accent);font-size:18px;line-height:1;">+</span>`}
+          </div>`;
+        }).join('');
+  return `<div class="modal-title">+ ADD GAME</div>
+    <input class="form-input" placeholder="Search your library…" value="${esc(S.tmp.q||'')}"
+      oninput="S.tmp.q=this.value;document.getElementById('modal').innerHTML=mAddGame('${evId}')" 
+      style="margin-bottom:0;">
+    <div class="gsearch-list">${listHtml}</div>
+    <div style="margin-top:8px;font-size:11px;color:var(--muted);">
+      ${S.lib.loaded?`${S.lib.all.length} games in your library`:'Load your library first from the Library tab'}
+    </div>
+    <div class="modal-footer"><button class="btn btn-primary" onclick="closeModal();renderDetail()">Done</button></div>`;
+}
+function doAddGame(evId, gameId) {
+  const ev=S.events.find(e=>e.id===evId); if(!ev) return;
+  if(ev.games.find(g=>g.gameId===gameId)) return;
+  const lg=libGame(gameId);
+  ev.games.push({gameId,title:lg?.title||'',con:lg?.con||'',icon:lg?.icon||'',achIds:[]});
+  saveAll();
+  document.getElementById('modal').innerHTML=mAddGame(evId);
+  if(S.detail.ev?.id===evId){S.detail.ev=ev;}
+  toast(`Added ${lg?.title||'game'}`,'ok');
+}
+
+// ACHIEVEMENT PICKER MODAL
+function openAchPicker(evId, gameId) {
+  S.tmp={evId,gameId,loading:true};
+  openModal('ach-picker',{evId,gameId});
+  fetchGameDetail(gameId).then(d=>{
+    S.tmp.achData=d; S.tmp.loading=false;
+    if(S.modal?.type==='ach-picker') document.getElementById('modal').innerHTML=mAchPicker({evId,gameId});
+  }).catch(err=>{
+    S.tmp.err=err.message; S.tmp.loading=false;
+    if(S.modal?.type==='ach-picker') document.getElementById('modal').innerHTML=mAchPicker({evId,gameId});
+  });
+}
+function mAchPicker({evId,gameId}) {
+  const ev=S.events.find(e=>e.id===evId);
+  const eg=ev?.games.find(g=>g.gameId===gameId);
+  if(!ev||!eg) return '';
+  const sel=new Set(eg.achIds||[]);
+  let body='';
+  if(S.tmp.loading) {
+    body=`<div class="loading-state"><div class="spinner"></div><div>Loading achievements…</div></div>`;
+  } else if(S.tmp.err) {
+    body=`<div style="color:var(--red);padding:16px;text-align:center;">${esc(S.tmp.err)}</div>`;
+  } else if(S.tmp.achData?.Achievements) {
+    const achs=Object.values(S.tmp.achData.Achievements);
+    const sc=sel.size;
+    body=`<div class="ach-selcount">${sc} achievement${sc!==1?'s':''} selected as qualifying</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">
+        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-right:4px;"></span>earned by you &nbsp;
+        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--border);margin-right:4px;"></span>not yet earned
+      </div>
+      <div class="ach-list">${achs.map(a=>{
+        const earned=!!(a.DateEarned||a.DateEarnedHardcore);
+        const on=sel.has(String(a.ID));
+        return `<div class="ach-item" onclick="togAch('${evId}',${gameId},'${a.ID}')">
+          <div class="ach-check ${on?'on':''}">✓</div>
+          <div class="ach-dot" style="background:${earned?'var(--accent)':'var(--border)'}"></div>
+          <div class="ach-name">${esc(a.Title)}<div style="font-size:11px;font-weight:400;color:var(--muted);margin-top:2px;">${esc(a.Description||'')}</div></div>
+          <div class="ach-pts">${a.Points}pt</div>
+        </div>`;
+      }).join('')}</div>`;
+  } else {
+    body=`<div style="color:var(--muted);padding:16px;text-align:center;">No achievements found</div>`;
+  }
+  return `<div class="modal-title">🎯 QUALIFYING ACHIEVEMENTS</div>
+    <div style="font-weight:800;font-size:14px;margin-bottom:14px;">${esc(eg.title||'Game #'+gameId)}</div>
+    ${body}
+    <div class="modal-footer">
+      <button class="btn" onclick="clrAchs('${evId}',${gameId})">Clear All</button>
+      <button class="btn btn-primary" onclick="closeModal();renderDetail()">Done</button>
+    </div>`;
+}
+function togAch(evId,gameId,achId) {
+  const ev=S.events.find(e=>e.id===evId);
+  const eg=ev?.games.find(g=>g.gameId===gameId);
+  if(!eg) return;
+  if(!eg.achIds) eg.achIds=[];
+  const idx=eg.achIds.indexOf(String(achId));
+  if(idx>=0) eg.achIds.splice(idx,1); else eg.achIds.push(String(achId));
+  saveAll();
+  if(S.modal?.type==='ach-picker') document.getElementById('modal').innerHTML=mAchPicker({evId,gameId});
+}
+function clrAchs(evId,gameId) {
+  const ev=S.events.find(e=>e.id===evId);
+  const eg=ev?.games.find(g=>g.gameId===gameId);
+  if(!eg) return;
+  eg.achIds=[];
+  saveAll();
+  if(S.modal?.type==='ach-picker') document.getElementById('modal').innerHTML=mAchPicker({evId,gameId});
+}
+
+// ─── BACKUP / RESTORE ─────────────────────────────────────────────
+function mBackup() {
+  const evCount = S.events.length;
+  const gameCount = S.events.reduce((n,e)=>n+e.games.length,0);
+  return `<div class="modal-title">💾 BACKUP & RESTORE</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.6;">
+      Your event data is saved in this browser only. Export a backup file regularly so you don't lose your events, play order, or achievement selections if your browser cache is cleared.
+    </div>
+    <div class="card" style="padding:16px;margin-bottom:12px;">
+      <div style="font-weight:800;font-size:14px;margin-bottom:4px;">Current Data</div>
+      <div style="font-size:12px;color:var(--muted);font-family:var(--mono);">${evCount} event${evCount!==1?'s':''} &middot; ${gameCount} game slot${gameCount!==1?'s':''}</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button class="btn btn-primary" style="justify-content:center;padding:13px;" onclick="doExport()">
+        ⬇ Export Backup File
+      </button>
+      <button class="btn" style="justify-content:center;padding:13px;" onclick="document.getElementById('import-file').click()">
+        ⬆ Import from Backup File
+      </button>
+    </div>
+    <div style="margin-top:14px;font-size:11px;color:var(--muted);line-height:1.6;">
+      ⚠ Importing will replace all current events. Your API credentials are not included in the backup.
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">Close</button>
+    </div>`;
+}
+
+function doExport() {
+  const data = { version: 1, exportedAt: new Date().toISOString(), events: S.events };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const date = new Date().toISOString().slice(0,10);
+  a.href = url; a.download = `ra-tracker-backup-${date}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  toast('Backup exported!', 'ok');
+}
+
+function doImport(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.events || !Array.isArray(data.events)) throw new Error('Invalid backup file format');
+      if (!confirm(`Import ${data.events.length} event(s)? This will replace your current events.`)) return;
+      S.events = data.events;
+      saveAll();
+      closeModal();
+      toast(`Imported ${S.events.length} event${S.events.length!==1?'s':''}!`, 'ok');
+      if (S.view === 'events') renderEvs();
+    } catch(err) {
+      toast('Import failed: ' + err.message, 'err');
+    }
+  };
+  reader.readAsText(file);
+  // reset so same file can be re-imported
+  document.getElementById('import-file').value = '';
+}
+
+// ─── NOTIFICATIONS ────────────────────────────────────────────────
+let _nt=null;
+function toast(msg,type='ok') {
+  const el=document.getElementById('notif');
+  el.textContent=msg; el.className=`notif ${type} show`;
+  clearTimeout(_nt);
+  _nt=setTimeout(()=>el.classList.remove('show'),2500);
+}
+
+// ─── SETUP SCREEN ─────────────────────────────────────────────────
+function submitSetup() {
+  const u = document.getElementById('su-user')?.value.trim();
+  const k = document.getElementById('su-key')?.value.trim();
+  if (!u || !k) { toast('Enter both username and API key', 'err'); return; }
+  S.cfg = { user: u, key: k };
+  saveAll();
+  document.getElementById('view-setup').classList.remove('active');
+  buildNav();
+  setView('library');
+}
+
+// ─── PERSISTENCE ──────────────────────────────────────────────────
+function saveAll() { LS.set('cfg',S.cfg); LS.set('events',S.events); }
+
+// ─── INIT ─────────────────────────────────────────────────────────
+function init() {
+  const cfg=LS.get('cfg',null);
+  if(cfg) S.cfg=cfg;
+  S.events=LS.get('events',[]);
+  buildNav();
+  if(S.cfg.user&&S.cfg.key) {
+    document.getElementById('view-setup').classList.remove('active');
+    setView('library');
+  }
+}
+
+// Make functions global (needed for inline onclick in dynamically rendered HTML)
+window.mAddGame=mAddGame; window.mAchPicker=mAchPicker; window.mBackup=mBackup;
+window.submitSetup=submitSetup; window.applySettings=applySettings;
+window.doExport=doExport; window.doImport=doImport;
+window.selType=selType; window.selColor=selColor;
+window.doCreateEvent=doCreateEvent; window.doSaveEvent=doSaveEvent; window.delEvent=delEvent;
+window.doAddGame=doAddGame; window.togAch=togAch; window.clrAchs=clrAchs;
+window.mvPrio=mvPrio; window.rmGame=rmGame;
+window.openDetail=openDetail; window.openAchPicker=openAchPicker;
+window.openModal=openModal; window.closeModal=closeModal; window.bgClick=bgClick;
+window.setView=setView; window.filterLib=filterLib; window.loadLibrary=loadLibrary;
+
+init();
+</script>
+</body>
+</html>
